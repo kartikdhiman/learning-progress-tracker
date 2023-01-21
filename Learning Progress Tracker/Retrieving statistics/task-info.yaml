@@ -1,18 +1,5 @@
 type: edu
 files:
-- name: src/tracker/Main.java
-  visible: true
-  text: "package tracker;\n\nimport tracker.verifyNewUser.AddStudent;\n\nimport java.util.Scanner;\n\
-    \npublic class Main {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println(\"\
-    Learning Progress Tracker\");\n\n\t\tvar scanner = new Scanner(System.in);\n\t\
-    \tString value;\n\n\t\tdo {\n\t\t\tvalue = scanner.nextLine();\n\t\t\tif (value.isEmpty()\
-    \ || value.isBlank()) {\n\t\t\t\tSystem.out.println(\"No input.\");\n\t\t\t} else\
-    \ if (value.equals(\"add students\")) {\n\t\t\t\tAddStudent.handle();\n\t\t\t\
-    } else if (value.equals(\"back\")) {\n\t\t\t\tSystem.out.println(\"Enter 'exit'\
-    \ to exit the program.\");\n\t\t\t} else if (!value.equals(\"exit\")) {\n\t\t\t\
-    \tSystem.out.println(\"Unknown command!\");\n\t\t\t} else {\n\t\t\t\tSystem.out.println(\"\
-    Bye!\");\n\t\t\t}\n\t\t} while (!value.equals(\"exit\"));\n\t}\n}\n"
-  learner_created: false
 - name: build.gradle
   visible: true
   text: |
@@ -45,53 +32,6 @@ files:
             assertEquals(5, 2 + 3);
         }
     }
-  learner_created: false
-- name: src/tracker/verifyNewUser/AddStudent.java
-  visible: true
-  text: "package tracker.verifyNewUser;\n\nimport java.util.Arrays;\nimport java.util.Scanner;\n\
-    \npublic class AddStudent {\n\tprivate static final Scanner scanner;\n\n\tstatic\
-    \ {\n\t\tscanner = new Scanner(System.in);\n\t}\n\n\tpublic static void handle()\
-    \ {\n\t\tString value;\n\t\tint students = 0;\n\t\tSystem.out.println(\"Enter\
-    \ student credentials or 'back' to return:\");\n\t\tdo {\n\t\t\tvalue = scanner.nextLine();\n\
-    \t\t\tif (value.equals(\"back\")) {\n\t\t\t\tvar message = String.format(\"Total\
-    \ %d students have been added.\", students);\n\t\t\t\tSystem.out.println(message);\n\
-    \t\t\t} else {\n\t\t\t\tvar inputs = value.split(\" \");\n\t\t\t\tvar message\
-    \ = processStudentCredentials(inputs);\n\t\t\t\tif (!message.contains(\"Incorrect\"\
-    )) students++;\n\t\t\t\tSystem.out.println(message);\n\t\t\t}\n\t\t} while (!value.equals(\"\
-    back\"));\n\t}\n\n\tpublic static String processStudentCredentials(String[] inputs)\
-    \ {\n\t\tvar msg = \"Incorrect credentials.\";\n\t\tif (inputs.length < 3) {\n\
-    \t\t\treturn msg;\n\t\t} else {\n\t\t\tvar firstName = inputs[0];\n\t\t\tvar lastNames\
-    \ = Arrays.copyOfRange(inputs, 1, inputs.length-1);\n\t\t\tvar email = inputs[inputs.length\
-    \ - 1];\n\t\t\tif (!isNameCorrect(firstName)) {\n\t\t\t\tmsg = \"Incorrect first\
-    \ name.\";\n\t\t\t} else if (!isLastNameCorrect(lastNames)) {\n\t\t\t\tmsg = \"\
-    Incorrect last name.\";\n\t\t\t} else if (!isEmailCorrect(email)) {\n\t\t\t\t\
-    msg = \"Incorrect email.\";\n\t\t\t} else {\n\t\t\t\tmsg = \"The student has been\
-    \ added.\";\n\t\t\t}\n\t\t}\n\t\treturn msg;\n\t}\n\n\tstatic boolean isEmailCorrect(String\
-    \ email) {\n\t\tvar test = \"[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+[.][a-zA-Z0-9]+\";\n\
-    \t\treturn email.matches(test);\n\t}\n\n\tpublic static boolean isNameCorrect(String\
-    \ input) {\n\t\tvar test = \"[a-zA-Z]+[-|']?(?!-)(?!')[a-zA-Z]*['|-]?[a-zA-Z]+\"\
-    ;\n\t\treturn input.matches(test);\n\t}\n\n\tpublic static boolean isLastNameCorrect(String[]\
-    \ input) {\n\t\tfor (String s : input) {\n\t\t\tif (!isNameCorrect(s)) {\n\t\t\
-    \t\treturn false;\n\t\t\t}\n\t\t}\n\t\treturn true;\n\t}\n}\n"
-  learner_created: false
-- name: test/tracker/verifyNewUser/AddStudentTest.java
-  visible: true
-  text: "package tracker.verifyNewUser;\n\nimport org.junit.jupiter.api.Test;\nimport\
-    \ org.junit.jupiter.params.ParameterizedTest;\nimport org.junit.jupiter.params.provider.ValueSource;\n\
-    \nimport static org.junit.jupiter.api.Assertions.*;\n\nclass AddStudentTest {\n\
-    \n\t@Test\n\tvoid incorrectCredentials() {\n\t\tString[] input1 = { \"help\" };\n\
-    \t\tString[] input2 = { \"hello\", \"there\" };\n\n\t\tvar result1 = AddStudent.processStudentCredentials(input1);\n\
-    \t\tvar result2 = AddStudent.processStudentCredentials(input2);\n\n\t\tassertEquals(\"\
-    Incorrect credentials.\", result1);\n\t\tassertEquals(\"Incorrect credentials.\"\
-    , result2);\n\t}\n\n\t@ParameterizedTest\n\t@ValueSource(strings = { \"J.\", \"\
-    हओय\", \"-f\", \"'g\", \"a\", \"hello-\", \"a-'\", \"a-'b\"})\n\tvoid incorrectFirstName(String\
-    \ input) {\n\t\tassertFalse(AddStudent.isNameCorrect(input));\n\t}\n\n\t@ParameterizedTest\n\
-    \t@ValueSource(strings = { \"hello\", \"a-b\", \"john's\", \"kd\" })\n\tvoid correctFirstName(String\
-    \ input) {\n\t\tassertTrue(AddStudent.isNameCorrect(input));\n\t}\n\n\t@ParameterizedTest\n\
-    \t@ValueSource(strings = { \"anny.md@mail.edu\" })\n\tvoid correctEmail(String\
-    \ input) {\n\t\tassertTrue(AddStudent.isEmailCorrect(input));\n\t}\n\n\t@ParameterizedTest\n\
-    \t@ValueSource(strings = { \"abc@anc\" })\n\tvoid inCorrectEmail(String input)\
-    \ {\n\t\tassertFalse(AddStudent.isEmailCorrect(input));\n\t}\n}"
   learner_created: false
 - name: test/LearningProgressTrackerTest.java
   visible: false
@@ -602,11 +542,16 @@ files:
             String[] lines = Arrays.stream(output.split("\n"))
                     .filter(Predicate.not(String::isBlank))
                     .toArray(String[]::new);
+            String feedback = "When the \"statistics\" command is entered, your " +
+                    "program must print: \"Type the name of a course to see details or 'back' " +
+                    "to quit:\", but your output was: ";
+
+            if (lines.length == 0) {
+                return CheckResult.wrong(feedback);
+            }
 
             if (anyMissingKeywords(lines[0], "course", "details", "back", "quit")) {
-                return CheckResult.wrong("When the \"statistics\" command is entered, your " +
-                        "program must print: \"Type the name of a course to see details or 'back' " +
-                        "to quit:\", but your output was: " + lines[0]);
+                return CheckResult.wrong(feedback + lines[0]);
             }
 
             if (lines.length < 7) {
@@ -717,6 +662,17 @@ files:
 
             main.execute("back");
             lines = expect(main.execute("statistics")).toContain().lines();
+
+            // 7  lines including the header and 6 lines with the information
+            if (lines.size() != 7) {
+                StringBuilder outputString = new StringBuilder();
+                lines.forEach(s -> outputString.append(s).append("\n"));
+                return CheckResult.wrong("Expected header: " +
+                        "Type the name of a course to see details or 'back' to quit" +
+                        "and six lines with the following information: " +
+                        "Most popular, Least popular, Highest activity, Lowest activity, Easiest course, Hardest course" +
+                        "but your output was: " + outputString);
+            }
 
             if (anyMissingKeywords(lines.get(1), "java", "dsa", "databases", "spring")) {
                 return CheckResult.wrong("Expected most popular: Java, DSA, Databases, Spring, " +
@@ -1006,6 +962,138 @@ files:
         }
     }
   learner_created: false
-feedback_link: https://hyperskill.org/projects/197/stages/982/implement#comment
-status: Unchecked
-record: -1
+- name: test/tracker/StudentServiceTest.java
+  visible: true
+  text: "package tracker;\n\nimport org.junit.jupiter.api.Test;\nimport org.junit.jupiter.params.ParameterizedTest;\n\
+    import org.junit.jupiter.params.provider.ValueSource;\n\nimport static org.junit.jupiter.api.Assertions.*;\n\
+    \nclass StudentServiceTest {\n\t@Test\n\tvoid incorrectCredentials() {\n\t\tString[]\
+    \ input1 = {\"help\"};\n\t\tString[] input2 = {\"hello\", \"there\"};\n\t\tStudentService\
+    \ studentService = new StudentService();\n\n\t\tvar result1 = studentService.processStudentCredentials(input1);\n\
+    \t\tvar result2 = studentService.processStudentCredentials(input2);\n\n\t\tassertEquals(\"\
+    Incorrect credentials.\", result1);\n\t\tassertEquals(\"Incorrect credentials.\"\
+    , result2);\n\t}\n\n\t@ParameterizedTest\n\t@ValueSource(strings = {\"J.\", \"\
+    हओय\", \"-f\", \"'g\", \"a\", \"hello-\", \"a-'\", \"a-'b\"})\n\tvoid incorrectFirstName(String\
+    \ input) {\n\t\tassertFalse(StudentService.isNameCorrect(input));\n\t}\n\n\t@ParameterizedTest\n\
+    \t@ValueSource(strings = {\"hello\", \"a-b\", \"john's\", \"kd\"})\n\tvoid correctFirstName(String\
+    \ input) {\n\t\tassertTrue(StudentService.isNameCorrect(input));\n\t}\n\n\t@ParameterizedTest\n\
+    \t@ValueSource(strings = {\"anny.md@mail.edu\"})\n\tvoid correctEmail(String input)\
+    \ {\n\t\tassertTrue(StudentService.isEmailCorrect(input));\n\t}\n\n\t@ParameterizedTest\n\
+    \t@ValueSource(strings = {\"abc@anc\"})\n\tvoid inCorrectEmail(String input) {\n\
+    \t\tassertFalse(StudentService.isEmailCorrect(input));\n\t}\n}"
+  learner_created: false
+- name: src/tracker/StudentService.java
+  visible: true
+  text: "package tracker;\n\nimport java.util.ArrayList;\nimport java.util.Arrays;\n\
+    import java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.List;\n\
+    import java.util.Map;\nimport java.util.Scanner;\nimport java.util.Set;\nimport\
+    \ java.util.stream.Collectors;\n\npublic class StudentService {\n\tScanner scanner\
+    \ = new Scanner(System.in);\n\tSet<String> emails = new HashSet<>();\n\tpublic\
+    \ Map<String, List<Integer>> scores = new HashMap<>();\n\tint id = 1000;\n\n\t\
+    public void addStudents() {\n\t\tString value;\n\t\tSystem.out.println(\"Enter\
+    \ student credentials or 'back' to return:\");\n\t\tdo {\n\t\t\tvalue = scanner.nextLine();\n\
+    \t\t\tif (value.equals(\"back\")) {\n\t\t\t\tvar message = String.format(\"Total\
+    \ %d students have been added.\", emails.size());\n\t\t\t\tSystem.out.println(message);\n\
+    \t\t\t} else {\n\t\t\t\tvar inputs = value.split(\" \");\n\t\t\t\tvar message\
+    \ = processStudentCredentials(inputs);\n\t\t\t\tSystem.out.println(message);\n\
+    \t\t\t}\n\t\t} while (!value.equals(\"back\"));\n\t}\n\n\tpublic String processStudentCredentials(String[]\
+    \ inputs) {\n\t\tvar msg = \"Incorrect credentials.\";\n\t\tif (inputs.length\
+    \ < 3) {\n\t\t\treturn msg;\n\t\t} else {\n\t\t\tvar firstName = inputs[0];\n\t\
+    \t\tvar lastNames = Arrays.copyOfRange(inputs, 1, inputs.length - 1);\n\t\t\t\
+    var email = inputs[inputs.length - 1];\n\t\t\tif (!isNameCorrect(firstName)) {\n\
+    \t\t\t\tmsg = \"Incorrect first name.\";\n\t\t\t} else if (!isLastNameCorrect(lastNames))\
+    \ {\n\t\t\t\tmsg = \"Incorrect last name.\";\n\t\t\t} else if (!isEmailCorrect(email))\
+    \ {\n\t\t\t\tmsg = \"Incorrect email.\";\n\t\t\t} else if (emails.contains(email))\
+    \ {\n\t\t\t\tmsg = \"This email is already taken.\";\n\t\t\t} else {\n\t\t\t\t\
+    emails.add(email);\n\t\t\t\tscores.put(String.valueOf(id), new ArrayList<>(List.of(0,\
+    \ 0, 0, 0)));\n\t\t\t\tid++;\n\t\t\t\tmsg = \"The student has been added.\";\n\
+    \t\t\t}\n\t\t}\n\t\treturn msg;\n\t}\n\n\tpublic void addPoints() {\n\t\tString\
+    \ userValue;\n\t\tSystem.out.println(\"Enter an id and points or 'back' to return:\"\
+    );\n\t\tdo {\n\t\t\tuserValue = scanner.nextLine();\n\t\t\tif (!userValue.equals(\"\
+    back\")) {\n\t\t\t\tvar input = userValue.split(\" \");\n\t\t\t\tSystem.out.println(scoreResult(input));\n\
+    \t\t\t}\n\t\t} while (!userValue.equals(\"back\"));\n\t}\n\n\tpublic String scoreResult(String[]\
+    \ input) {\n\t\tvar msg = \"Incorrect points format.\";\n\n\t\tif (input.length\
+    \ != 5) return msg;\n\n\t\tvar key = input[0];\n\t\tvar marks = Arrays.copyOfRange(input,\
+    \ 1, input.length);\n\t\tvar nonNumeric = Arrays.stream(marks)\n\t\t\t\t\t\t.filter(i\
+    \ -> !i.matches(\"\\\\d+\"))\n\t\t\t\t\t\t.collect(Collectors.toList());\n\n\t\
+    \tif (!nonNumeric.isEmpty()) return msg;\n\n\t\tvar integerInput = Arrays.stream(marks)\n\
+    \t\t\t\t\t\t.map(Integer::parseInt)\n\t\t\t\t\t\t.collect(Collectors.toList());\n\
+    \t\tvar incorrectScore = integerInput.stream()\n\t\t\t\t\t\t.filter(i -> i < 0)\n\
+    \t\t\t\t\t\t.collect(Collectors.toList());\n\n\t\tif (!incorrectScore.isEmpty())\
+    \ return msg;\n\n\t\tif (!scores.containsKey(key)) {\n\t\t\tmsg = \"No student\
+    \ is found for id=\" + input[0];\n\t\t} else {\n\t\t\tvar subjects = scores.get(key);\n\
+    \t\t\tsubjects.add(0, subjects.get(0) + integerInput.get(0));\n\t\t\tsubjects.add(1,\
+    \ subjects.get(1) + integerInput.get(1));\n\t\t\tsubjects.add(2, subjects.get(2)\
+    \ + integerInput.get(2));\n\t\t\tsubjects.add(3, subjects.get(3) + integerInput.get(3));\n\
+    \t\t\tmsg = \"Points updated.\";\n\t\t}\n\n\t\treturn msg;\n\t}\n\n\tpublic static\
+    \ boolean isEmailCorrect(String email) {\n\t\tvar test = \"[a-zA-Z\\\\d.-]+@[a-zA-Z\\\
+    \\d.-]+[.][a-zA-Z\\\\d]+\";\n\t\treturn email.matches(test);\n\t}\n\n\tpublic\
+    \ static boolean isNameCorrect(String input) {\n\t\tvar test = \"[a-zA-Z]+[-|']?(?!-)(?!')[a-zA-Z]*['|-]?[a-zA-Z]+\"\
+    ;\n\t\treturn input.matches(test);\n\t}\n\n\tpublic static boolean isLastNameCorrect(String[]\
+    \ input) {\n\t\tfor (String s : input) {\n\t\t\tif (!isNameCorrect(s)) {\n\t\t\
+    \t\treturn false;\n\t\t\t}\n\t\t}\n\t\treturn true;\n\t}\n\n\tpublic void find()\
+    \ {\n\t\tString userValue;\n\t\tSystem.out.println(\"Enter an id or 'back' to\
+    \ return:\");\n\t\tdo {\n\t\t\tuserValue = scanner.nextLine();\n\t\t\tif (!userValue.equals(\"\
+    back\")) {\n\t\t\t\tif (!scores.containsKey(userValue)) {\n\t\t\t\t\tSystem.out.println(\"\
+    No student is found for id=\" + userValue);\n\t\t\t\t} else {\n\t\t\t\t\tvar subjects\
+    \ = scores.get(userValue);\n\t\t\t\t\tvar msg = String.format(\"%s points: Java=%d;\
+    \ DSA=%d; Databases=%d; Spring=%d\", userValue,\n\t\t\t\t\t\t\t\t\tsubjects.get(0),\n\
+    \t\t\t\t\t\t\t\t\tsubjects.get(1),\n\t\t\t\t\t\t\t\t\tsubjects.get(2),\n\t\t\t\
+    \t\t\t\t\t\tsubjects.get(3));\n\t\t\t\t\tSystem.out.println(msg);\n\t\t\t\t}\n\
+    \t\t\t}\n\t\t} while (!userValue.equals(\"back\"));\n\t}\n}"
+  learner_created: true
+- name: src/tracker/Student.java
+  visible: true
+  learner_created: true
+- name: src/tracker/Options.java
+  visible: true
+  text: "package tracker;\n\nimport java.util.Arrays;\n\npublic enum Options {\n\t\
+    ADD_STUDENTS(\"add students\"),\n\tADD_POINTS(\"add points\"),\n\tLIST(\"list\"\
+    ),\n\tFIND(\"find\"),\n\tBACK(\"back\"),\n\tEXIT(\"exit\"),\n\tINVALID(\"invalid\"\
+    );\n\n\tprivate final String label;\n\n\tOptions(String s) {\n\t\tlabel = s;\n\
+    \t}\n\n\t@Override\n\tpublic String toString() {\n\t\treturn this.label;\n\t}\n\
+    \n\tpublic static Options valueOfLabel(String label) {\n\t\treturn Arrays.stream(values())\n\
+    \t\t\t\t\t\t.filter(option -> option.label.equals(label))\n\t\t\t\t\t\t.findFirst()\n\
+    \t\t\t\t\t\t.orElse(Options.INVALID);\n\t}\n}"
+  learner_created: true
+- name: src/tracker/LearningProgressTracker.java
+  visible: true
+  text: "package tracker;\n\nimport java.util.Scanner;\n\npublic class LearningProgressTracker\
+    \ {\n\tprivate final StudentService studentService;\n\n\tpublic LearningProgressTracker(StudentService\
+    \ studentService) {\n\t\tthis.studentService = studentService;\n\t}\n\n\tpublic\
+    \ void start() {\n\t\tSystem.out.println(\"Learning Progress Tracker\");\n\t\t\
+    var scanner = new Scanner(System.in);\n\t\tString label;\n\n\t\tdo {\n\t\t\tlabel\
+    \ = scanner.nextLine();\n\t\t\tif (label.isEmpty() || label.isBlank()) {\n\t\t\
+    \t\tSystem.out.println(\"No input.\");\n\t\t\t\tcontinue;\n\t\t\t}\n\n\t\t\tswitch\
+    \ (Options.valueOfLabel(label)) {\n\t\t\t\tcase ADD_STUDENTS:\n\t\t\t\t\tstudentService.addStudents();\n\
+    \t\t\t\t\tbreak;\n\t\t\t\tcase ADD_POINTS:\n\t\t\t\t\tstudentService.addPoints();\n\
+    \t\t\t\t\tbreak;\n\t\t\t\tcase LIST:\n\t\t\t\t\tif (studentService.scores.isEmpty())\
+    \ {\n\t\t\t\t\t\tSystem.out.println(\"No students found.\");\n\t\t\t\t\t} else\
+    \ {\n\t\t\t\t\t\tSystem.out.println(\"Students:\");\n\t\t\t\t\t\tstudentService.scores.keySet().forEach(System.out::println);\n\
+    \t\t\t\t\t}\n\t\t\t\t\tbreak;\n\t\t\t\tcase FIND:\n\t\t\t\t\tstudentService.find();\n\
+    \t\t\t\t\tbreak;\n\t\t\t\tcase BACK:\n\t\t\t\t\tSystem.out.println(\"Enter 'exit'\
+    \ to exit the program.\");\n\t\t\t\t\tbreak;\n\t\t\t\tcase EXIT:\n\t\t\t\t\tSystem.out.println(\"\
+    Bye!\");\n\t\t\t\t\tbreak;\n\t\t\t\tdefault:\n\t\t\t\t\tSystem.out.println(\"\
+    Unknown command!\");\n\t\t\t}\n\t\t} while (!label.equals(\"exit\"));\n\t}\n}"
+  learner_created: true
+- name: src/tracker/Course.java
+  visible: true
+  learner_created: true
+- name: src/tracker/Main.java
+  visible: true
+  text: "package tracker;\n\nimport tracker.verifyNewUser.AddStudent;\n\nimport java.util.Scanner;\n\
+    \npublic class Main {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println(\"\
+    Learning Progress Tracker\");\n\n\t\tvar scanner = new Scanner(System.in);\n\t\
+    \tString value;\n\n\t\tdo {\n\t\t\tvalue = scanner.nextLine();\n\t\t\tif (value.isEmpty()\
+    \ || value.isBlank()) {\n\t\t\t\tSystem.out.println(\"No input.\");\n\t\t\t} else\
+    \ if (value.equals(\"add students\")) {\n\t\t\t\tAddStudent.handle();\n\t\t\t\
+    } else if (value.equals(\"back\")) {\n\t\t\t\tSystem.out.println(\"Enter 'exit'\
+    \ to exit the program.\");\n\t\t\t} else if (!value.equals(\"exit\")) {\n\t\t\t\
+    \tSystem.out.println(\"Unknown command!\");\n\t\t\t} else {\n\t\t\t\tSystem.out.println(\"\
+    Bye!\");\n\t\t\t}\n\t\t} while (!value.equals(\"exit\"));\n\t}\n}\n"
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/14399#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Sat, 18 Feb 2023 22:49:33 UTC"
+record: 6

@@ -1,148 +1,254 @@
 package tracker;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.lang.String.join;
+
 public class StudentService {
 	Scanner scanner = new Scanner(System.in);
 	Set<String> emails = new HashSet<>();
-	public Map<String, List<Integer>> scores = new HashMap<>();
-	int id = 1000;
+	List<Student> students = new ArrayList<>();
 
 	public void addStudents() {
 		String value;
-		System.out.println("Enter student credentials or 'back' to return:");
+		print("Enter student credentials or 'back' to return:");
 		do {
-			value = scanner.nextLine();
+			value = getUserInput();
 			if (value.equals("back")) {
 				var message = String.format("Total %d students have been added.", emails.size());
-				System.out.println(message);
+				print(message);
 			} else {
 				var inputs = value.split(" ");
-				var message = processStudentCredentials(inputs);
-				System.out.println(message);
+				var message = processCredentials(inputs);
+				print(message);
 			}
 		} while (!value.equals("back"));
 	}
 
-	public String processStudentCredentials(String[] inputs) {
+	public String processCredentials(String[] inputs) {
 		var msg = "Incorrect credentials.";
 		if (inputs.length < 3) {
 			return msg;
+		}
+		var firstName = inputs[0];
+		var lastNames = Arrays.copyOfRange(inputs, 1, inputs.length - 1);
+		var email = inputs[inputs.length - 1];
+		if (isNameNotCorrect(firstName)) {
+			msg = "Incorrect first name.";
+		} else if (!isLastNameCorrect(lastNames)) {
+			msg = "Incorrect last name.";
+		} else if (!isEmailCorrect(email)) {
+			msg = "Incorrect email.";
+		} else if (emails.contains(email)) {
+			msg = "This email is already taken.";
 		} else {
-			var firstName = inputs[0];
-			var lastNames = Arrays.copyOfRange(inputs, 1, inputs.length - 1);
-			var email = inputs[inputs.length - 1];
-			if (!isNameCorrect(firstName)) {
-				msg = "Incorrect first name.";
-			} else if (!isLastNameCorrect(lastNames)) {
-				msg = "Incorrect last name.";
-			} else if (!isEmailCorrect(email)) {
-				msg = "Incorrect email.";
-			} else if (emails.contains(email)) {
-				msg = "This email is already taken.";
-			} else {
-				emails.add(email);
-				scores.put(String.valueOf(id), new ArrayList<>(List.of(0, 0, 0, 0)));
-				id++;
-				msg = "The student has been added.";
-			}
+			emails.add(email);
+			students.add(new Student(email, firstName + " " + join(" ", lastNames)));
+			msg = "The student has been added.";
 		}
 		return msg;
 	}
 
 	public void addPoints() {
 		String userValue;
-		System.out.println("Enter an id and points or 'back' to return:");
+		print("Enter an id and points or 'back' to return:");
 		do {
-			userValue = scanner.nextLine();
+			userValue = getUserInput();
 			if (!userValue.equals("back")) {
 				var input = userValue.split(" ");
-				System.out.println(scoreResult(input));
+				print(inputMessage(input));
 			}
 		} while (!userValue.equals("back"));
 	}
 
-	public String scoreResult(String[] input) {
+	private String inputMessage(String[] input) {
 		var msg = "Incorrect points format.";
 
 		if (input.length != 5) return msg;
 
-		var key = input[0];
+		var id = input[0];
 		var marks = Arrays.copyOfRange(input, 1, input.length);
-		var nonNumeric = Arrays.stream(marks)
-						.filter(i -> !i.matches("\\d+"))
-						.collect(Collectors.toList());
-
+		var nonNumeric = Arrays.stream(marks).filter(i -> !i.matches("\\d+")).toList();
 		if (!nonNumeric.isEmpty()) return msg;
 
-		var integerInput = Arrays.stream(marks)
-						.map(Integer::parseInt)
-						.collect(Collectors.toList());
-		var incorrectScore = integerInput.stream()
-						.filter(i -> i < 0)
-						.collect(Collectors.toList());
-
+		var inputScores = Arrays.stream(marks).map(Integer::parseInt).toList();
+		var incorrectScore = inputScores.stream().filter(i -> i < 0).toList();
 		if (!incorrectScore.isEmpty()) return msg;
 
-		if (!scores.containsKey(key)) {
-			msg = "No student is found for id=" + input[0];
-		} else {
-			var subjects = scores.get(key);
-			subjects.add(0, subjects.get(0) + integerInput.get(0));
-			subjects.add(1, subjects.get(1) + integerInput.get(1));
-			subjects.add(2, subjects.get(2) + integerInput.get(2));
-			subjects.add(3, subjects.get(3) + integerInput.get(3));
-			msg = "Points updated.";
+		var record = Student.findById(students, id);
+		if (record.isEmpty()) {
+			return "No student is found for id=" + id;
 		}
+		var student = record.get();
+		student.java += inputScores.get(0);
+		student.dsa += inputScores.get(1);
+		student.databases += inputScores.get(2);
+		student.spring += inputScores.get(3);
 
-		return msg;
+		Course.JAVA.totalScore += inputScores.get(0);
+		Course.DSA.totalScore += inputScores.get(1);
+		Course.DATABASES.totalScore += inputScores.get(2);
+		Course.SPRING.totalScore += inputScores.get(3);
+
+		if (inputScores.get(0) > 0) {
+			Course.JAVA.totalSubmissions++;
+			Course.JAVA.addStudent(student.id());
+		}
+		if (inputScores.get(1) > 0) {
+			Course.DSA.totalSubmissions++;
+			Course.DSA.addStudent(student.id());
+		}
+		if (inputScores.get(2) > 0) {
+			Course.DATABASES.totalSubmissions++;
+			Course.DATABASES.addStudent(student.id());
+		}
+		if (inputScores.get(3) > 0) {
+			Course.SPRING.totalSubmissions++;
+			Course.SPRING.addStudent(student.id());
+		}
+		return "Points updated.";
 	}
 
-	public static boolean isEmailCorrect(String email) {
+	public void find() {
+		String userValue;
+		print("Enter an id or 'back' to return:");
+		do {
+			userValue = getUserInput();
+			if (!userValue.equals("back")) {
+				var record = Student.findById(students, userValue);
+				if (record.isEmpty()) {
+					print("No student is found for id=" + userValue);
+					continue;
+				}
+				var student = record.get();
+				print("%s points: Java=%.0f; DSA=%.0f; Databases=%.0f; Spring=%.0f".formatted(userValue,
+								student.java,
+								student.dsa,
+								student.databases,
+								student.spring
+				));
+			}
+		} while (!userValue.equals("back"));
+	}
+
+	public void showStatistics() {
+		var na = "n/a";
+		String userInput;
+		var mostPopular = Course.mostPopular();
+		var leastPopular = Course.leastPopular()
+						.stream().filter(c -> !mostPopular.contains(c)).collect(Collectors.toList());
+		if (leastPopular.isEmpty()) leastPopular.add(na);
+		var highestActivity = Course.highestActivity();
+		var lowestActivity = Course.lowestActivity()
+						.stream().filter(c -> !highestActivity.contains(c)).collect(Collectors.toList());
+		if (lowestActivity.isEmpty()) lowestActivity.add(na);
+		var easiestCourse = Course.easiestCourse();
+		var hardestCourse = Course.hardestCourse()
+						.stream().filter(c -> !easiestCourse.contains(c)).collect(Collectors.toList());
+		if (hardestCourse.isEmpty()) hardestCourse.add(na);
+		print("""
+						Type the name of a course to see details or 'back' to quit:
+						Most popular: %s
+						Least popular: %s
+						Highest activity: %s
+						Lowest activity: %s
+						Easiest course: %s
+						Hardest course: %s""".formatted(
+						join(", ", mostPopular), join(", ", leastPopular),
+						join(", ", highestActivity), join(", ", lowestActivity),
+						join(", ", easiestCourse), join(", ", hardestCourse)
+		));
+
+		do {
+			userInput = getUserInput();
+			if (!userInput.equals("back")) {
+				if (!Course.courseList().contains(userInput.toLowerCase())) {
+					print("Unknown course");
+				} else {
+					if (userInput.equalsIgnoreCase(Course.JAVA.name)) {
+						printStatistics(Course.JAVA);
+					} else if (userInput.equalsIgnoreCase(Course.DSA.name)) {
+						printStatistics(Course.DSA);
+					} else if (userInput.equalsIgnoreCase(Course.DATABASES.name)) {
+						printStatistics(Course.DATABASES);
+					} else if (userInput.equalsIgnoreCase(Course.SPRING.name)) {
+						printStatistics(Course.SPRING);
+					}
+				}
+			}
+		} while (!userInput.equals("back"));
+	}
+
+	private void printStatistics(Course course) {
+	 List<StudentScoreCard> scores = new ArrayList<>();
+		print("""
+						%s
+						id		points	completed""".formatted(course.name));
+		students.stream()
+						.filter(student -> course.students.contains(student.id()))
+						.forEach(student -> {
+							switch (course) {
+								case JAVA -> {
+									var percentage = new BigDecimal(student.java / course.passingScore * 100).setScale(1, RoundingMode.HALF_UP);
+									scores.add(new StudentScoreCard(student.id(), student.java, percentage.toString()));
+									scores.sort(StudentScoreCard.scoreCardComparator());
+								}
+								case DSA -> {
+									var percentage = new BigDecimal(student.dsa / course.passingScore * 100).setScale(1, RoundingMode.HALF_UP);
+									scores.add(new StudentScoreCard(student.id(), student.dsa, percentage.toString()));
+									scores.sort(StudentScoreCard.scoreCardComparator());
+								}
+								case DATABASES -> {
+									var percentage = new BigDecimal(student.databases / course.passingScore * 100).setScale(1, RoundingMode.HALF_UP);
+									scores.add(new StudentScoreCard(student.id(), student.databases, percentage.toString()));
+									scores.sort(StudentScoreCard.scoreCardComparator());
+								}
+								case SPRING -> {
+									var percentage = new BigDecimal(student.spring / course.passingScore * 100).setScale(1, RoundingMode.HALF_UP);
+									scores.add(new StudentScoreCard(student.id(), student.spring, percentage.toString()));
+									scores.sort(StudentScoreCard.scoreCardComparator());
+								}
+							}
+						});
+		scores.forEach(System.out::println);
+	}
+
+	public String getUserInput() {
+		return scanner.nextLine();
+	}
+
+	public List<Integer> fetchIds() {
+		return students.stream().map(Student::id).toList();
+	}
+
+	private boolean isEmailCorrect(String email) {
 		var test = "[a-zA-Z\\d.-]+@[a-zA-Z\\d.-]+[.][a-zA-Z\\d]+";
 		return email.matches(test);
 	}
 
-	public static boolean isNameCorrect(String input) {
+	private boolean isNameNotCorrect(String input) {
 		var test = "[a-zA-Z]+[-|']?(?!-)(?!')[a-zA-Z]*['|-]?[a-zA-Z]+";
-		return input.matches(test);
+		return !input.matches(test);
 	}
 
-	public static boolean isLastNameCorrect(String[] input) {
+	private boolean isLastNameCorrect(String[] input) {
 		for (String s : input) {
-			if (!isNameCorrect(s)) {
+			if (isNameNotCorrect(s)) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public void find() {
-		String userValue;
-		System.out.println("Enter an id or 'back' to return:");
-		do {
-			userValue = scanner.nextLine();
-			if (!userValue.equals("back")) {
-				if (!scores.containsKey(userValue)) {
-					System.out.println("No student is found for id=" + userValue);
-				} else {
-					var subjects = scores.get(userValue);
-					var msg = String.format("%s points: Java=%d; DSA=%d; Databases=%d; Spring=%d", userValue,
-									subjects.get(0),
-									subjects.get(1),
-									subjects.get(2),
-									subjects.get(3));
-					System.out.println(msg);
-				}
-			}
-		} while (!userValue.equals("back"));
+	private void print(String msg) {
+		System.out.println(msg);
 	}
 }

@@ -9,6 +9,7 @@ public enum Options {
 	FIND("find"),
 	BACK("back"),
 	EXIT("exit"),
+	STATISTICS("statistics"),
 	INVALID("invalid");
 
 	private final String label;
