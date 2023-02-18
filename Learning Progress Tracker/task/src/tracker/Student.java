@@ -14,6 +14,10 @@ public final class Student {
 	double dsa;
 	double databases;
 	double spring;
+	boolean isJavaNotified;
+	boolean isDSANotified;
+	boolean isDatabasesNotified;
+	boolean isSpringNotified;
 
 	public Student(String studentId, String email, String name) {
 		this.studentId = studentId;

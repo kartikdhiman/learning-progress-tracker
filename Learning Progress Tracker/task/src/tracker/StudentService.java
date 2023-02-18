@@ -221,6 +221,37 @@ public class StudentService {
 		scores.forEach(System.out::println);
 	}
 
+	public void notifyStudent() {
+		var total = new HashSet<Integer>();
+		var template = """
+						To: %s
+						Re: Your Learning Progress
+						Hello, %s! You have accomplished our %s course!""";
+		for (Student student : students) {
+			if (!student.isJavaNotified && Course.JAVA.passingScore == student.java) {
+				print(template.formatted(student.email(), student.name(), Course.JAVA.name));
+				student.isJavaNotified = true;
+				total.add(student.id());
+			}
+			if (!student.isDSANotified && Course.DSA.passingScore == student.dsa) {
+				print(template.formatted(student.email(), student.name(), Course.DSA.name));
+				student.isDSANotified = true;
+				total.add(student.id());
+			}
+			if (!student.isDatabasesNotified && Course.DATABASES.passingScore == student.dsa) {
+				print(template.formatted(student.email(), student.name(), Course.DATABASES.name));
+				student.isDatabasesNotified = true;
+				total.add(student.id());
+			}
+			if (!student.isSpringNotified && Course.SPRING.passingScore == student.dsa) {
+				print(template.formatted(student.email(), student.name(), Course.SPRING.name));
+				student.isSpringNotified = true;
+				total.add(student.id());
+			}
+		}
+		print("Total %d students have been notified.".formatted(total.size()));
+	}
+
 	public String getUserInput() {
 		return scanner.nextLine();
 	}

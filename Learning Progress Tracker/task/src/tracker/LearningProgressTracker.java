@@ -31,6 +31,7 @@ public class LearningProgressTracker {
 				}
 				case FIND -> studentService.find();
 				case STATISTICS -> studentService.showStatistics();
+				case NOTIFY -> studentService.notifyStudent();
 				case BACK -> System.out.println("Enter 'exit' to exit the program.");
 				case EXIT -> System.out.println("Bye!");
 				default -> System.out.println("Unknown command!");

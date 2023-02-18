@@ -10,6 +10,7 @@ public enum Options {
 	BACK("back"),
 	EXIT("exit"),
 	STATISTICS("statistics"),
+	NOTIFY("notify"),
 	INVALID("invalid");
 
 	private final String label;
